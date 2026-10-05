@@ -1,0 +1,39 @@
+# Python and build output
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+build/
+.build/
+.build-cache/
+dist/
+*.spec
+.pytest_cache/
+.coverage
+
+# Downloaded resources are verified by scripts/fetch_resources.py
+models/*.onnx
+assets/ffmpeg.exe
+.downloads/
+*.part
+*.part-*
+
+# Local media, exports, reports and credentials
+input/
+processed/
+test-media/
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
+*.log
+selfcheck*.json
+.env
+.env.*
+*.pem
+*.key
+*.pfx
+Thumbs.db
+Desktop.ini
+.DS_Store

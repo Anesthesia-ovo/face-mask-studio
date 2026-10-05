@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "purpose": "Build-time downloads only; this file and downloader are not bundled into the offline application.",
+  "artifacts": [
+    {
+      "path": "models/face_detection_yunet_2023mar.onnx",
+      "url": "https://media.githubusercontent.com/media/opencv/opencv_zoo/f12e12798e8314f7c074a6656816c048dcc95b7a/models/face_detection_yunet/face_detection_yunet_2023mar.onnx",
+      "sha256": "8f2383e4dd3cfbb4553ea8718107fc0423210dc964f9f4280604804ed2552fa4",
+      "bytes": 232589,
+      "source_commit": "f12e12798e8314f7c074a6656816c048dcc95b7a",
+      "license": "MIT",
+      "notice": "licenses/YuNet-MIT.txt"
+    },
+    {
+      "path": "models/face_recognition_sface_2021dec.onnx",
+      "url": "https://media.githubusercontent.com/media/opencv/opencv_zoo/ba91a3b91d00d76e86540d4013f944bd6b514e39/models/face_recognition_sface/face_recognition_sface_2021dec.onnx",
+      "sha256": "0ba9fbfa01b5270c96627c4ef784da859931e02f04419c829e83484087c34e79",
+      "bytes": 38696353,
+      "source_commit": "ba91a3b91d00d76e86540d4013f944bd6b514e39",
+      "license": "Apache-2.0",
+      "notice": "licenses/SFace-Apache-2.0.txt"
+    },
+    {
+      "path": "assets/ffmpeg.exe",
+      "archive_url": "https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-9.0.2-essentials_build.zip",
+      "archive_sha256": "60f467265b1e312373dbcd92200c2618a74850f98d3d078e94296bb3fa2047ba",
+      "archive_member": "ffmpeg-9.0.2-essentials_build/bin/ffmpeg.exe",
+      "sha256": "3256173f3f8bffd7df12227c68adf68025edb1832273a9530688a7bb1ed8edec",
+      "bytes": 105423872,
+      "version": "9.0.2",
+      "license": "GPL-3.0-or-later",
+      "notice": "licenses/FFmpeg-GPL-3.0.txt",
+      "source_release": "https://ffmpeg.org/releases/ffmpeg-9.0.2.tar.xz"
+    }
+  ]
+}

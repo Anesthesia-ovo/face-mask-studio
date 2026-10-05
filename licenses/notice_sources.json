@@ -1,0 +1,67 @@
+[
+  {
+    "component": "numpy",
+    "version": "2.2.6",
+    "notice": "numpy-LICENSE.txt",
+    "source": "https://pypi.org/project/numpy/2.2.6/"
+  },
+  {
+    "component": "pillow",
+    "version": "12.3.0",
+    "notice": "pillow-LICENSE",
+    "source": "https://pypi.org/project/pillow/12.3.0/"
+  },
+  {
+    "component": "opencv-python",
+    "version": "4.14.0.94",
+    "notice": "opencv_python-LICENSE-3RD-PARTY.txt",
+    "source": "https://pypi.org/project/opencv-python/4.14.0.94/"
+  },
+  {
+    "component": "pyinstaller",
+    "version": "6.22.3",
+    "notice": "pyinstaller-COPYING.txt",
+    "source": "https://pypi.org/project/pyinstaller/6.22.3/"
+  },
+  {
+    "component": "Python",
+    "version": "3.12.14",
+    "notice": "Python-LICENSE.txt",
+    "source": "https://www.python.org/"
+  },
+  {
+    "component": "Tk",
+    "notice": "Tk-license.terms",
+    "source": "https://github.com/tcltk/tk"
+  },
+  {
+    "component": "Tcl",
+    "notice": "Tcl-license.terms",
+    "source": "https://raw.githubusercontent.com/tcltk/tcl/core-8-6-12/license.terms",
+    "sha256": "c0a69a2bfd757361ec7e6143973b103c90409316b49e9c88db26ad6388e79f16"
+  },
+  {
+    "component": "YuNet",
+    "notice": "YuNet-MIT.txt",
+    "source": "https://raw.githubusercontent.com/opencv/opencv_zoo/main/models/face_detection_yunet/LICENSE",
+    "sha256": "c83b8120c50ccbd4c4f96edf53141bdd566ebb8f8e9227e415326aa1b1aba958"
+  },
+  {
+    "component": "SFace",
+    "notice": "SFace-Apache-2.0.txt",
+    "source": "https://raw.githubusercontent.com/opencv/opencv_zoo/main/models/face_recognition_sface/LICENSE",
+    "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+  },
+  {
+    "component": "FFmpeg",
+    "notice": "FFmpeg-GPL-3.0.txt",
+    "source": "https://raw.githubusercontent.com/FFmpeg/FFmpeg/n9.0.2/COPYING.GPLv3",
+    "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903"
+  },
+  {
+    "component": "FFmpeg",
+    "notice": "FFmpeg-LICENSE.md",
+    "source": "https://raw.githubusercontent.com/FFmpeg/FFmpeg/n9.0.2/LICENSE.md",
+    "sha256": "2e1d16c72fd74e12063776371da757322f8b77589386532f4fd8634bde7de1af"
+  }
+]
