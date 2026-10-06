@@ -151,13 +151,23 @@ def _checked_settings(settings: Settings) -> None:
         raise EngineError("检测分辨率需要在 320 到 4096 之间。")
 
 
-def _read_image(path: Path) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+def _read_image(path: Path, metadata: Optional[Dict] = None) -> Tuple[np.ndarray, Optional[np.ndarray]]:
     try:
         with python_warnings.catch_warnings():
             python_warnings.simplefilter("error", Image.DecompressionBombWarning)
             with Image.open(str(path), formats=["JPEG", "PNG", "BMP", "TIFF", "WEBP"]) as im:
-                if getattr(im, "n_frames", 1) > 1:
+                source_format = str(im.format or "")
+                source_frame_count = int(getattr(im, "n_frames", 1))
+                # Camera JPEGs may use MPO to carry an auxiliary image (e.g.
+                # a smaller preview or HDR data). Process the primary JPEG only;
+                # this exception does not allow animation or multi-page images.
+                if source_frame_count > 1 and source_format != "MPO":
                     raise EngineError("不支持多帧图片；请先转换成视频或单帧图片。")
+                if source_format == "MPO":
+                    im.seek(0)
+                if metadata is not None:
+                    metadata.update(source_format=source_format, source_frame_count=source_frame_count,
+                                    primary_only=source_format == "MPO" and source_frame_count > 1)
                 im = ImageOps.exif_transpose(im)
                 alpha = None
                 if "A" in im.getbands() or "transparency" in im.info:
@@ -182,9 +192,10 @@ def _capture(path: Path):
 def read_preview(path, frame_index: int = 0) -> Tuple[np.ndarray, Dict]:
     path = _local_file(path)
     if path.suffix.lower() in IMAGE_EXTENSIONS:
-        frame, _ = _read_image(path)
+        metadata = {}
+        frame, _ = _read_image(path, metadata)
         return frame, {"type": "image", "width": frame.shape[1], "height": frame.shape[0],
-                       "fps": 0.0, "duration": 0.0, "frame_count": 1, "frame_index": 0}
+                       "fps": 0.0, "duration": 0.0, "frame_count": 1, "frame_index": 0, **metadata}
     if path.suffix.lower() not in VIDEO_EXTENSIONS:
         raise EngineError("不支持的文件类型：" + path.suffix)
     capture = _capture(path)
@@ -562,7 +573,8 @@ class FaceEngine:
 
     def _process_image(self, path, output_dir, settings, selection, cancel_event, callback):
         self._progress(callback, 0.0, "正在检测图片人脸…")
-        frame, alpha = _read_image(path)
+        source_metadata = {}
+        frame, alpha = _read_image(path, source_metadata)
         faces = self.detect(frame, settings)
         kept = self.keep_indices(frame, settings, selection, faces)
         result = frame.copy()
@@ -588,6 +600,8 @@ class FaceEngine:
             if temporary.exists():
                 temporary.unlink()
         warnings = []
+        if source_metadata.get("primary_only"):
+            warnings.append("MPO 图片仅处理主图；附加图片及 HDR 辅助信息不会导出，成品为普通 PNG。")
         if not len(faces):
             warnings.append("未检测到人脸；请检查成品，必要时手动添加遮挡框。")
         if settings.mode == "selected" and len(selection.keep_faces) and not kept:

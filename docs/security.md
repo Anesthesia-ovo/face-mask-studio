@@ -17,7 +17,7 @@ FaceMaskStudio 的识别、跟踪、预览和导出在本机完成。程序没�
 
 公开发布包不附带独立 Gyan FFmpeg 编码器，以便其下载与本地使用和本项目的二进制分发分开进行。视频准备脚本验证 ZIP 的固定 SHA-256，只提取所需的 `ffmpeg.exe`。OpenCV 轮子内的 LGPL FFmpeg 组件随发布包提供，并附有相应的许可证与对应源码包；它和视频导出需要的独立编码器是两个组件。
 
-对应源码包 `FaceMaskStudio-1.0.0-OpenCV-FFmpeg-sources.zip` 和 Windows 便携包一同提供于 [Releases](https://github.com/Anesthesia-ovo/face-mask-studio/releases)。第三方组件的详细说明见 [`THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md)。
+对应源码包 [FaceMaskStudio-1.0.0-OpenCV-FFmpeg-sources.zip](https://github.com/Anesthesia-ovo/face-mask-studio/releases/download/v1.0.0/FaceMaskStudio-1.0.0-OpenCV-FFmpeg-sources.zip) 保存在 1.0.0 发布页；1.0.1 使用相同的第三方组件，继续使用这份对应源码。第三方组件的详细说明见 [`THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md)。
 
 ## 实现中的限制
 
@@ -25,7 +25,7 @@ FaceMaskStudio 的识别、跟踪、预览和导出在本机完成。程序没�
 - 输入与输出路径检查拒绝 URL、UNC 共享和 Windows 映射网络盘，并在解析路径后再次检查远程位置。
 - OpenCV 视频读取强制使用 FFmpeg 后端，限定 `file,pipe` 协议和允许的媒体格式。
 - 独立 FFmpeg 编码器使用参数列表启动，`shell=False`；原音轨读取也受到本地协议与格式限制。
-- 图片依据内容使用 JPEG、PNG、BMP、TIFF、WebP 解码白名单，多帧图片和异常巨大图片会被拒绝。
+- 图片依据内容使用 JPEG、PNG、BMP、TIFF、WebP 解码白名单，动画图片、多页 TIFF 和异常巨大图片会被拒绝。1.0.1 起，相机 MPO JPG 仅读取首张主图，附加图片不会导出。
 - 人物选择参考帧与脸部特征仅用于当前处理会话；输出图片移除原始 EXIF 与位置元数据。
 
 这些是本程序入口和媒体处理路径中的限制，并非操作系统防火墙或完整进程沙箱。FFmpeg 原始构建包含其他协议能力，但应用只以限定的参数调用它。直接调用第三方二进制、修改入口或替换依赖不属于这里验证的运行方式。
@@ -48,6 +48,8 @@ FaceMaskStudio 的识别、跟踪、预览和导出在本机完成。程序没�
 - 打包 EXE 自检，覆盖 Python 网络限制、YuNet 加载、遮挡像素变化、中文图片输入输出，以及 FFmpeg 视频编码。
 - 内容伪装检查：拒绝改名为 PNG 的 EPS，以及改名为 MP4 的网络播放列表。
 - 源码审查：应用没有远程请求、登录、遥测、更新、上传、`eval` 或 shell 命令拼接路径。
+
+1.0.1 的引擎回归测试共 14 项：13 项通过，1 项因缺少可选真实人脸夹具跳过；新增相机 MPO 主图预览和 PNG 导出，以及动画图片、多页 TIFF 仍拒绝的检查。更新后的打包自检共 7 项，增加 Tk 图片绘制和 MPO 主图处理。
 
 公开发布包的完整视频自检需要先准备视频组件。上述验证证明所检查的样例和路径能够正常运行，不能保证所有视频、所有面孔或未来依赖版本都具有相同表现。公共仓库的可复现测试使用合成图像和本地生成视频，不需要上传私人素材。
 

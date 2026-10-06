@@ -39,6 +39,6 @@ SFace 目录声明适用于目录中全部文件的 Apache-2.0 许可。关于�
 
 [FFmpeg 官方许可说明](https://ffmpeg.org/legal.html)建议提供与所发布库完全对应的源码和构建说明。GPLv3 第 6 条及 LGPL 对二进制和对应源码的提供方式有进一步要求，详见保留的完整许可文本。发布时应在二进制下载位置明确给出对应源码的取得方式，并保证相关材料可取得。
 
-公开 Windows 包已附带 OpenCV 视频库的对应源码附件 `FaceMaskStudio-1.0.0-OpenCV-FFmpeg-sources.zip`，其中包含上述固定版本的完整库源码、完整 OpenCV 子模块、构建脚本、来源清单和重建说明。发布库的 MD5 与 OpenCV 下载配置中的固定值一致；每份取得的源码均记录 SHA-256。该库未在当前 Windows 主机重新编译，因此没有声称编译产物可逐字节复现。
+公开 Windows 包所用 OpenCV 视频库的[对应源码附件](https://github.com/Anesthesia-ovo/face-mask-studio/releases/download/v1.0.0/FaceMaskStudio-1.0.0-OpenCV-FFmpeg-sources.zip)保存在 1.0.0 发布页，1.0.1 继续使用相同组件和这份源码。附件包含上述固定版本的完整库源码、完整 OpenCV 子模块、构建脚本、来源清单和重建说明。发布库的 MD5 与 OpenCV 下载配置中的固定值一致；每份取得的源码均记录 SHA-256。该库未在当前 Windows 主机重新编译，因此没有声称编译产物可逐字节复现。
 
 公开 Windows 包不包含独立 Gyan `ffmpeg.exe`；这个组件由用户在使用前通过包内 `准备视频组件.ps1` 从官方上游取得并校验。该独立程序的完整对应源码尚未在本项目收集齐。

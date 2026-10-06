@@ -106,6 +106,7 @@ class FaceMaskApp:
         self.cancel_event = threading.Event()
         self.closed = False
         self.preview_loading = False
+        self.preview_error_message = ""
         self.ui_lock_widgets: list[Any] = []
         self.default_states: dict[Any, str] = {}
         self.mode_var = tk.StringVar(value="自动保留最大人脸")
@@ -425,6 +426,7 @@ class FaceMaskApp:
         self.current_keep = set()
         self.current_metadata = {}
         self.preview_loading = False
+        self.preview_error_message = ""
         self.preview_info_var.set("尚未选择文件")
         self.selection_info_var.set("绿色保留主角，橙色遮挡背景人物。")
         self.frame_time_var.set("00:00 / 00:00")
@@ -442,6 +444,7 @@ class FaceMaskApp:
             return
         self.current_id = iid
         self.current_frame = self.current_masked = None
+        self.preview_error_message = ""
         self.current_index = 0
         self.seek_var.set(0)
         self.current_metadata = {}
@@ -497,6 +500,7 @@ class FaceMaskApp:
         source = self.current_frame.copy() if reuse and self.current_frame is not None and index == self.current_index else None
         metadata = dict(self.current_metadata)
         self.preview_loading = True
+        self.preview_error_message = ""
         self.status_var.set("正在读取媒体并检测人脸……")
         self._render()
         def worker():
@@ -523,6 +527,7 @@ class FaceMaskApp:
         if token != self.preview_generation or iid != self.current_id or self.busy:
             return
         self.preview_loading = False
+        self.preview_error_message = ""
         self.current_frame = frame
         self.current_masked = masked
         self.current_faces = np.asarray(faces if faces is not None else np.empty((0, 15)), dtype=np.float32)
@@ -540,6 +545,10 @@ class FaceMaskApp:
         self.frame_time_var.set(f"{self._time(index / fps)} / {self._time(float(metadata.get('duration') or 0))}" if is_video else "图片")
         filename = Path(self.items[iid].path).name
         extra = f" · {fps:.2f} fps · 帧 {index + 1}/{frame_count}" if is_video else ""
+        if metadata.get("primary_only"):
+            source_format = str(metadata.get("source_format") or "多图容器")
+            source_frames = int(metadata.get("source_frame_count") or 1)
+            extra += f" · {source_format} · 仅显示主图（共 {source_frames} 帧）"
         self.preview_info_var.set(f"{filename}\n{width} × {height}{extra} · 检出 {len(self.current_faces)} 张人脸")
         self._selection_summary()
         self.status_var.set("预览已更新。点击人脸切换保留；拖框可补充漏检区域。")
@@ -568,6 +577,9 @@ class FaceMaskApp:
         width = max(1, self.canvas.winfo_width())
         height = max(1, self.canvas.winfo_height())
         if self.current_frame is None:
+            if self.preview_error_message:
+                self.canvas.create_text(width / 2, height / 2, text="预览失败\n\n" + self.preview_error_message, fill="#ffb6bb", font=("Microsoft YaHei UI", 11), width=max(100, width - 45), justify="center")
+                return
             self.canvas.create_text(width / 2, height / 2 - 18, text="正在读取媒体……" if self.preview_loading else "添加文件，开始保护画面中的人脸", fill="#c3cee0", font=("Microsoft YaHei UI", 14), width=max(100, width - 45))
             self.canvas.create_text(width / 2, height / 2 + 22, text="图片 / 视频 · 手动选择 · 自动跟踪", fill="#71849f", font=("Microsoft YaHei UI", 10))
             return
@@ -837,6 +849,7 @@ class FaceMaskApp:
                     token, iid, message = args
                     if token == self.preview_generation and iid == self.current_id and not self.busy:
                         self.preview_loading = False
+                        self.preview_error_message = message
                         self.current_frame = self.current_masked = None
                         self.status_var.set(f"预览失败：{message}")
                         self.preview_info_var.set(f"无法预览：{Path(self.items[iid].path).name}")

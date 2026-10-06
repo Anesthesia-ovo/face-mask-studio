@@ -119,6 +119,64 @@ class EngineTests(unittest.TestCase):
             self.assertEqual(frame.shape[:2], (60, 30))
             self.assertEqual((info["width"], info["height"]), (30, 60))
 
+    def test_camera_mpo_jpg_processes_primary_image(self):
+        # Camera JPGs can contain a primary JPEG plus an auxiliary image.
+        # This generated fixture needs no private photographs or model files.
+        with tempfile.TemporaryDirectory(prefix="mpo-test-") as temporary:
+            folder = Path(temporary)
+            source = folder / "相机主图.JPG"
+            primary = Image.new("RGB", (64, 48), (20, 160, 20))
+            auxiliary = Image.new("RGB", (32, 24), (20, 20, 240))
+            primary.save(source, format="MPO", save_all=True, append_images=[auxiliary],
+                         quality=100, subsampling=0)
+            original = source.read_bytes()
+            with Image.open(source) as container:
+                self.assertEqual((container.format, container.n_frames), ("MPO", 2))
+            frame, info = engine.read_preview(source)
+            self.assertEqual(frame.shape, (48, 64, 3))
+            self.assertEqual((info["width"], info["height"]), (64, 48))
+            self.assertEqual(info["source_format"], "MPO")
+            self.assertEqual(info["source_frame_count"], 2)
+            self.assertTrue(info["primary_only"])
+            self.assertEqual(info["frame_count"], 1)
+            self.assertLess(np.abs(frame[0, 0].astype(int) - [20, 160, 20]).max(), 4)
+            self.assertEqual(len(engine._read_image(source)), 2)
+            selection = engine.MediaSelection(manual_boxes=[(8, 8, 16, 16)])
+            result = self.fake.process_file(source, folder / "out",
+                                            engine.Settings(effect="solid", padding=0), selection)
+            with Image.open(result["output"]) as final:
+                self.assertEqual((final.format, final.size, final.mode), ("PNG", (64, 48), "RGB"))
+                pixels = np.asarray(final)
+                self.assertTrue(np.all(pixels[10:20, 10:20] == 0))
+                self.assertTrue(np.array_equal(pixels[0, 0], frame[0, 0, ::-1]))
+            self.assertTrue(any("MPO" in message and "主图" in message and "HDR" in message
+                                for message in result["warnings"]))
+            self.assertEqual(source.read_bytes(), original)
+
+    def test_other_multiframe_images_remain_rejected(self):
+        # Allowing camera MPOs must not silently discard animation or TIFF pages.
+        Image.init()
+        formats = [("TIFF", ".tiff"), ("PNG", ".png"), ("WEBP", ".webp")]
+        with tempfile.TemporaryDirectory(prefix="multiframe-test-") as temporary:
+            folder = Path(temporary)
+            for image_format, extension in formats:
+                if image_format not in Image.SAVE_ALL:
+                    continue
+                with self.subTest(image_format=image_format):
+                    source = folder / ("multiframe" + extension)
+                    Image.new("RGB", (48, 32), "green").save(
+                        source, format=image_format, save_all=True,
+                        append_images=[Image.new("RGB", (48, 32), "blue")], duration=100, loop=0)
+                    original = source.read_bytes()
+                    with Image.open(source) as container:
+                        self.assertEqual(container.n_frames, 2)
+                    with self.assertRaisesRegex(engine.EngineError, "不支持多帧图片"):
+                        engine.read_preview(source)
+                    with self.assertRaisesRegex(engine.EngineError, "不支持多帧图片"):
+                        self.fake.process_file(source, folder / "out", engine.Settings())
+                    self.assertEqual(source.read_bytes(), original)
+                    self.assertFalse((folder / "out").exists())
+
     def test_pre_cancelled(self):
         with tempfile.TemporaryDirectory() as temporary:
             source = Path(temporary) / "x.png"

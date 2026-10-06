@@ -33,6 +33,18 @@ def run(report_path):
         assert masked.shape == frame.shape
         assert np.mean(np.abs(masked[70:140, 110:170].astype(float) - frame[70:140, 110:170])) > 5
         checks.append('Manual mosaic changes selected pixels')
+        import tkinter as tk
+        from PIL import Image, ImageTk
+        preview_root = tk.Tk()
+        preview_root.withdraw()
+        try:
+            photo = ImageTk.PhotoImage(Image.new('RGB', (32, 24), (31, 98, 177)), master=preview_root)
+            assert (photo.width(), photo.height()) == (32, 24)
+            assert tuple(map(int, preview_root.tk.call(str(photo), 'get', 0, 0))) == (31, 98, 177)
+            checks.append('Bundled Tk image preview paints the expected pixels')
+            del photo
+        finally:
+            preview_root.destroy()
         report_path = Path(report_path).resolve()
         report_path.parent.mkdir(parents=True, exist_ok=True)
         with tempfile.TemporaryDirectory(prefix='selfcheck_', dir=str(report_path.parent)) as folder:
@@ -48,6 +60,18 @@ def run(report_path):
             assert output_path.is_file()
             assert source.read_bytes() == encoded.tobytes()
             checks.append('Unicode image input/output and original preservation')
+            mpo_source = folder / 'camera_multi_picture.jpg'
+            Image.fromarray(frame[:, :, ::-1]).save(mpo_source, format='MPO', save_all=True,
+                                                  append_images=[Image.new('RGB', (160, 120), (0, 0, 255))])
+            mpo_frame, mpo_metadata = read_preview(mpo_source)
+            assert mpo_frame.shape == frame.shape
+            assert mpo_metadata['source_format'] == 'MPO' and mpo_metadata['source_frame_count'] == 2
+            assert mpo_metadata['primary_only'] is True
+            mpo_result = process_file(mpo_source, folder / 'processed', settings, selected,
+                                      threading.Event(), lambda *_: None)
+            with Image.open(mpo_result['output']) as mpo_output:
+                assert mpo_output.format == 'PNG' and mpo_output.size == (320, 240)
+            checks.append('Multi-picture camera JPEG previews and exports its primary image')
             writer = cv2.VideoWriter(str(folder / 'moving.avi'), cv2.VideoWriter_fourcc(*'MJPG'), 12, (320,240))
             assert writer.isOpened()
             for index in range(12):
